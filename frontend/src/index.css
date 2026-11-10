@@ -1,0 +1,87 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f8fafc;
+  color: #0f172a;
+  overflow-x: hidden;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+html.dark body {
+  background-color: #0b0f19;
+  color: #f1f5f9;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+html.dark ::-webkit-scrollbar-thumb {
+  background: #1e293b;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: #334155;
+}
+
+/* Glass & Card Utilities */
+@layer utilities {
+  .glass-card {
+    background: #ffffff;
+    backdrop-filter: blur(16px);
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+  }
+  html.dark .glass-card {
+    background: rgba(15, 23, 42, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: none;
+  }
+  .glass-card-hover {
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .glass-card-hover:hover {
+    border-color: rgba(99, 102, 241, 0.4);
+    box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.1);
+    transform: translateY(-2px);
+  }
+  html.dark .glass-card-hover:hover {
+    border-color: rgba(99, 102, 241, 0.3);
+    box-shadow: 0 10px 30px -10px rgba(79, 70, 229, 0.15);
+  }
+  .glow-indigo {
+    box-shadow: 0 0 25px -5px rgba(99, 102, 241, 0.25);
+  }
+  .glow-emerald {
+    box-shadow: 0 0 25px -5px rgba(16, 185, 129, 0.25);
+  }
+  .font-mono-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-variant-numeric: tabular-nums;
+  }
+}

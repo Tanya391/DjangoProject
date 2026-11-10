@@ -1,0 +1,80 @@
+date,receiver,description,amount,transaction_type,balance
+2024-01-01,Company Pvt Ltd,Salary Credit,60000,credit,110000
+2024-01-01,Electricity Bill,Online Payment,251,debit,109749
+2024-01-02,Zomato,Online Payment,2127,debit,107622
+2024-01-03,Neha,UPI Transfer,1501,credit,109123
+2024-01-03,Swiggy,Online Payment,816,credit,109939
+2024-01-05,Landlord,House Rent,15000,debit,94939
+2024-01-05,Mobile Recharge,Online Payment,1006,debit,93933
+2024-01-06,Mobile Recharge,Online Payment,4467,debit,89466
+2024-01-09,Myntra,Online Payment,3951,debit,85515
+2024-01-10,Priya,UPI Transfer,2140,debit,83375
+2024-01-11,Mobile Recharge,Online Payment,2202,debit,81173
+2024-01-11,Ola,Online Payment,2762,credit,83935
+2024-01-12,Neha,UPI Transfer,3490,debit,80445
+2024-01-12,Blinkit,Online Payment,3530,credit,83975
+2024-01-13,Priya,UPI Transfer,2970,debit,81005
+2024-01-13,Priya,UPI Transfer,4669,credit,85674
+2024-01-14,Myntra,Online Payment,2990,credit,88664
+2024-01-14,Flipkart,Online Payment,2026,credit,90690
+2024-01-15,Myntra,Online Payment,2574,debit,88116
+2024-01-15,Flipkart,Online Payment,944,credit,89060
+2024-01-17,Priya,UPI Transfer,4369,debit,84691
+2024-01-17,Amazon,Online Payment,1139,credit,85830
+2024-01-19,Swiggy,Online Payment,2082,credit,87912
+2024-01-19,Mobile Recharge,Online Payment,4003,debit,83909
+2024-01-20,Zomato,Online Payment,1720,debit,82189
+2024-01-20,Blinkit,Online Payment,1620,debit,80569
+2024-01-21,Mobile Recharge,Online Payment,585,credit,81154
+2024-01-21,Uber,Online Payment,1961,credit,83115
+2024-01-22,Swiggy,Online Payment,2274,credit,85389
+2024-01-22,Aman,UPI Transfer,649,debit,84740
+2024-01-24,Zomato,Online Payment,897,debit,83843
+2024-01-25,Uber,Online Payment,2730,debit,81113
+2024-01-26,Zomato,Online Payment,3460,debit,77653
+2024-01-26,Flipkart,Online Payment,1495,credit,79148
+2024-01-27,Rahul,UPI Transfer,3059,credit,82207
+2024-01-27,Neha,UPI Transfer,4766,debit,77441
+2024-01-30,Aman,UPI Transfer,3064,credit,80505
+2024-01-30,Blinkit,Online Payment,1192,credit,81697
+2024-01-31,Amazon,Online Payment,4141,debit,77556
+2024-01-31,Aman,UPI Transfer,1255,credit,78811
+2024-02-01,Company Pvt Ltd,Salary Credit,60000,credit,138811
+2024-02-01,Myntra,Online Payment,1636,credit,140447
+2024-02-02,Priya,UPI Transfer,1917,credit,142364
+2024-02-02,Flipkart,Online Payment,4680,debit,137684
+2024-02-03,Aman,UPI Transfer,1452,debit,136232
+2024-02-03,Flipkart,Online Payment,379,credit,136611
+2024-02-04,Flipkart,Online Payment,3315,debit,133296
+2024-02-05,Landlord,House Rent,15000,debit,118296
+2024-02-05,Myntra,Online Payment,4271,debit,114025
+2024-02-05,Blinkit,Online Payment,1160,debit,112865
+2024-02-06,Blinkit,Online Payment,3088,debit,109777
+2024-02-06,Zomato,Online Payment,1030,credit,110807
+2024-02-07,Uber,Online Payment,1470,debit,109337
+2024-02-07,Mobile Recharge,Online Payment,2551,credit,111888
+2024-02-08,Flipkart,Online Payment,4535,credit,116423
+2024-02-10,Electricity Bill,Online Payment,2792,credit,119215
+2024-02-10,Electricity Bill,Online Payment,1341,credit,120556
+2024-02-11,Aman,UPI Transfer,3406,debit,117150
+2024-02-11,Swiggy,Online Payment,3228,debit,113922
+2024-02-12,Neha,UPI Transfer,1601,debit,112321
+2024-02-13,Rahul,UPI Transfer,644,debit,111677
+2024-02-13,Swiggy,Online Payment,1021,debit,110656
+2024-02-14,Priya,UPI Transfer,3127,debit,107529
+2024-02-15,Flipkart,Online Payment,2940,credit,110469
+2024-02-15,Neha,UPI Transfer,1122,credit,111591
+2024-02-16,Rahul,UPI Transfer,3434,debit,108157
+2024-02-17,Zomato,Online Payment,1434,debit,106723
+2024-02-17,Amazon,Online Payment,1026,credit,107749
+2024-02-20,Myntra,Online Payment,2603,credit,110352
+2024-02-21,Flipkart,Online Payment,1552,credit,111904
+2024-02-21,Mobile Recharge,Online Payment,3080,credit,114984
+2024-02-22,Blinkit,Online Payment,2111,credit,117095
+2024-02-22,Priya,UPI Transfer,3701,credit,120796
+2024-02-24,Uber,Online Payment,2561,debit,118235
+2024-02-24,Swiggy,Online Payment,1842,credit,120077
+2024-02-25,Mobile Recharge,Online Payment,3226,debit,116851
+2024-02-25,Aman,UPI Transfer,2657,credit,119508
+2024-02-26,Aman,UPI Transfer,4466,credit,123974
+2024-02-27,Rahul,UPI Transfer,2499,credit,126473

@@ -1,0 +1,25 @@
+{
+  "name": "finagent-frontend",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "^5.100.10",
+    "framer-motion": "^12.38.0",
+    "lucide-react": "^1.28.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-router-dom": "^7.15.1",
+    "recharts": "^3.8.1",
+    "zustand": "^5.0.13"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.14",
+    "vite": "^5.4.8"
+  }
+}

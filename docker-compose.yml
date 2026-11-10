@@ -1,0 +1,46 @@
+
+services:
+  # ── Infrastructure ──────────────────────────────────────────────────────────
+  mongodb:
+    image: mongo:7.0
+    container_name: finagent_mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    environment:
+      MONGO_INITDB_DATABASE: finagent_ai
+
+  # ── Backend ─────────────────────────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: finagent_backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./backend/.env
+    environment:
+      - MONGO_URI=mongodb://mongodb:27017
+    depends_on:
+      - mongodb
+
+  # ── Frontend ─────────────────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_BASE_URL=http://localhost:8000/api/v1
+    container_name: finagent_frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  mongo_data:

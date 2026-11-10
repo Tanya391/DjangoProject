@@ -1,0 +1,50 @@
+services:
+  # ---------------------------------------------------------------------------
+  # Backend — pulls Docker image from DockerHub
+  # Image is built and pushed by GitHub Actions on every push to main
+  # ---------------------------------------------------------------------------
+  - type: web
+    name: finagent-server
+    image:
+      url: docker.io/tanya391/finagent-server:latest
+    healthCheckPath: /api/v1/status/
+    envVars:
+      - key: PORT
+        value: 8000
+      - key: DEBUG
+        value: false
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ALLOWED_HOSTS
+        value: finagent-server.onrender.com
+      - key: MONGO_URI
+        sync: false
+      - key: DB_NAME
+        value: finagent_ai
+      - key: MONGO_TRANSACTIONS_COLLECTION
+        value: transactions
+      - key: MONGO_SERVER_SELECTION_TIMEOUT_MS
+        value: 30000
+      - key: MONGO_CONNECT_TIMEOUT_MS
+        value: 30000
+      - key: MONGO_SOCKET_TIMEOUT_MS
+        value: 30000
+      - key: EMBEDDING_MODEL
+        value: all-MiniLM-L6-v2
+      - key: RAG_TOP_K
+        value: 8
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        value: gemini-3.5-flash
+
+  # ---------------------------------------------------------------------------
+  # Frontend — pulls Docker image from DockerHub
+  # ---------------------------------------------------------------------------
+  - type: web
+    name: finagent-ui
+    image:
+      url: docker.io/tanya391/finagent-ui:latest
+    envVars:
+      - key: PORT
+        value: 80
