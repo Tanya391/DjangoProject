@@ -1,41 +1,98 @@
 # FinAgent AI
 
-FinAgent AI is an AI-powered personal finance dashboard that allows users to upload their transaction data and ask open-ended questions about their spending habits using Google Gemini.
+FinAgent AI is an AI-powered personal finance analysis application built with a **Decoupled (Headless) Architecture**:
+- **Backend:** Django 5.x, Django ORM, and Django REST Framework (DRF)
+- **Frontend:** React, Vite, and TailwindCSS
+- **Database:** Relational SQLite database (`db.sqlite3`) with Django ORM
+- **AI Engine:** Google Gemini (`gemini-1.5-flash` via `google-genai` SDK)
 
-## 🏗️ Recent Architecture Modifications (Backend Hardening)
-This project has recently undergone a major architectural simplification and backend hardening:
-- **Vector Database (Qdrant) Removed:** Replaced with a lightweight, deterministic MongoDB document retrieval system.
-- **LLM Consolidation:** Removed Groq, HuggingFace, and local `sentence-transformers`. The application now exclusively uses the modern `google-genai` SDK with `gemini-3.5-flash` for all AI features.
-- **Deterministic Analytics:** Complex analytics and categorization are now 100% deterministic, meaning no AI hallucinations for precise financial calculations. AI is strictly reserved for natural language understanding and open-ended analysis.
-- **Removed Legacy "Anomalies":** The outdated anomalies detection feature has been removed.
-- **New Data Management:** Added endpoints to seed demo data (`/api/v1/seed/`) and upload CSV files (`/api/v1/upload/`).
-- **Query History:** User queries are now securely logged and can be fetched via `/api/v1/history/`.
+---
 
-## 💻 Tech Stack
-- **Backend**: Django, Django REST Framework, PyMongo, Google GenAI SDK
-- **Frontend**: React, Vite, TailwindCSS, Zustand
-- **Database**: MongoDB
-- **Deployment**: Docker, Docker Compose (Ready for Render/GitHub Actions)
+## 🏗️ Architecture & Features
+
+1. **Django ORM Data Layer:**
+   - Relational models: `Transaction` and `Category` with Foreign Keys linked to Django's built-in `User` model.
+   - Comprehensive Django migrations (`0001_initial.py`).
+   - High-performance deterministic analytics engine using Django ORM aggregations (`Sum`, `Count`, `TruncMonth`).
+
+2. **Django Admin Interface:**
+   - Fully customized admin dashboard for data auditing, list filters by category/type/date, full-text search, and role-based access control (RBAC).
+
+3. **RESTful API & Authentication:**
+   - Stateless authentication powered by `djangorestframework-simplejwt` (Access & Refresh tokens).
+   - DRF Serializers handling JSON schema validation and error reporting.
+
+4. **Hybrid AI & Deterministic Retrieval:**
+   - Exact mathematical calculations and monthly summaries are executed via Django ORM.
+   - Natural language queries, financial insights, and spending explanations are processed via Google Gemini.
+
+---
 
 ## 🚀 Getting Started Locally
 
-1. Clone the repository.
-2. Start the services using Docker:
+### 1. Backend Setup (Django)
+
+1. Navigate to the backend directory:
    ```bash
-   docker-compose up --build -d
+   cd backend
    ```
-3. The backend runs on `localhost:8000` and the frontend runs on `localhost:80`.
 
-### Environment Variables
-For the backend to work, provide the following in `backend/.env`:
-```env
-GEMINI_API_KEY=your_key_here
-GEMINI_MODEL=gemini-3.5-flash
-MONGO_URI=mongodb://mongodb:27017
-SECRET_KEY=your_django_secret
-DEBUG=true
-ALLOWED_HOSTS=localhost,127.0.0.1
+2. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. Configure environment variables (optional for local dev):
+   Copy `.env.example` to `.env`:
+   ```bash
+   copy .env.example .env
+   ```
+
+4. Apply migrations (pre-configured SQLite database included):
+   ```bash
+   python manage.py migrate
+   ```
+
+5. (Optional) Seed realistic demo transactions:
+   ```bash
+   python manage.py seed_transactions --months 6
+   ```
+
+6. Start the Django development server:
+   ```bash
+   python manage.py runserver
+   ```
+   - **Backend API:** `http://127.0.0.1:8000/api/v1/status/`
+   - **Django Admin Panel:** `http://127.0.0.1:8000/admin/`
+     - **Admin User:** `admin`
+     - **Admin Password:** `admin123`
+
+---
+
+### 2. Frontend Setup (React + Vite)
+
+1. In a new terminal, navigate to the frontend directory:
+   ```bash
+   cd frontend
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Start the Vite development server:
+   ```bash
+   npm run dev
+   ```
+   - Open your browser at: `http://localhost:5173`
+
+---
+
+## 🧪 Automated Testing
+
+Run the Django unit test suite:
+```bash
+python manage.py test
 ```
-
-## 🧪 Testing
-The backend has been rigorously tested across a 30-phase verification checklist covering deterministic routing, data isolation, exact analytics output, file ingestion, error handling, and robust AI grounding without hallucinations.
+All tests verify ORM model creation, foreign key relationships, merchant auto-normalization, and API endpoints.

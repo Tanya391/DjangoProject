@@ -1,5 +1,4 @@
 import hashlib
-import requests
 from django.conf import settings
 from rest_framework.exceptions import APIException
 from .prompts import build_grounded_prompt
@@ -31,15 +30,6 @@ def _set_cached(key: str, value: dict) -> None:
         oldest = next(iter(_RESPONSE_CACHE))
         del _RESPONSE_CACHE[oldest]
     _RESPONSE_CACHE[key] = value
-
-
-# ---------------------------------------------------------------------------
-# HTTP helper
-# ---------------------------------------------------------------------------
-def _request_json(url: str, payload: dict, headers: dict, timeout_sec: int) -> dict:
-    response = requests.post(url, json=payload, headers=headers, timeout=timeout_sec)
-    response.raise_for_status()
-    return response.json()
 
 
 # ---------------------------------------------------------------------------

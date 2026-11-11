@@ -3,7 +3,6 @@ API Views — wired to query parser, query router, hybrid retrieval, and analyti
 """
 
 from django.contrib.auth.models import User
-from pymongo.errors import AutoReconnect, ConnectionFailure, NetworkTimeout, ServerSelectionTimeoutError
 from rest_framework import generics, status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -29,20 +28,6 @@ from .services import generate_demo_data, ingest_csv
 import os
 import tempfile
 from rest_framework.parsers import MultiPartParser, FormParser
-
-MONGO_CONNECTION_ERRORS = (
-    ServerSelectionTimeoutError,
-    ConnectionFailure,
-    NetworkTimeout,
-    AutoReconnect,
-)
-
-
-def _is_mongo_unavailable(exc: Exception) -> bool:
-    if isinstance(exc, MONGO_CONNECTION_ERRORS):
-        return True
-    return isinstance(exc, RuntimeError) and "Could not connect to MongoDB" in str(exc)
-
 
 def _get_user_id(request) -> str | None:
     """Return a string user_id from the authenticated request, or None."""
@@ -145,11 +130,6 @@ class RetrieveTransactionsView(generics.GenericAPIView):
                 }
             )
         except Exception as exc:
-            if _is_mongo_unavailable(exc):
-                return Response(
-                    {"error": "Database unavailable. Please try again later."},
-                    status=status.HTTP_503_SERVICE_UNAVAILABLE,
-                )
             return Response({"error": str(exc)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def post(self, request):
@@ -185,18 +165,33 @@ class AskQuestionView(generics.GenericAPIView):
             # --- Analytics route: deterministic, no LLM ---
             if route == ROUTE_ANALYTICS:
                 analytics_result = execute_analytics_route(parsed, user_id)
-                return Response({
+                summary_answer = analytics_result.get("summary") or "Analytics computed successfully."
+                response_data = {
                     "question": question,
                     "route": route,
                     "intent": parsed.intent,
-                    "answer": analytics_result.get("summary") or "Analytics computed successfully.",
+                    "answer": summary_answer,
                     "data": analytics_result.get("data"),
                     "provider": "analytics_engine",
                     "provider_errors": [],
                     "sources": [],
                     "source_count": 0,
                     "confidence": 1.0,
-                })
+                }
+                from .models import QueryLog
+                if user_id:
+                    try:
+                        u_obj = User.objects.filter(id=int(user_id)).first()
+                        QueryLog.objects.create(
+                            user=u_obj,
+                            question=question,
+                            route=route,
+                            answer=summary_answer,
+                            source_count=0
+                        )
+                    except Exception:
+                        pass
+                return Response(response_data)
 
             # --- Retrieval-only route ---
             if route == ROUTE_RETRIEVAL:
@@ -235,29 +230,24 @@ class AskQuestionView(generics.GenericAPIView):
                 "confidence": _compute_confidence(transactions),
             }
             
-            # Save to query history
-            from .utils import get_db
-            from datetime import datetime
+            # Save to query history (Django ORM)
+            from .models import QueryLog
             if user_id:
                 try:
-                    db = get_db()
-                    db.query_history.insert_one({
-                        "user_id": user_id,
-                        "question": question,
-                        "route": route,
-                        "timestamp": datetime.utcnow()
-                    })
+                    u_obj = User.objects.filter(id=int(user_id)).first()
+                    QueryLog.objects.create(
+                        user=u_obj,
+                        question=question,
+                        route=route,
+                        answer=response_data.get("answer") or "",
+                        source_count=response_data.get("source_count", 0),
+                    )
                 except Exception:
                     pass
 
             return Response(response_data)
 
         except Exception as exc:
-            if _is_mongo_unavailable(exc):
-                return Response(
-                    {"error": "Database unavailable. Please try again later."},
-                    status=status.HTTP_503_SERVICE_UNAVAILABLE,
-                )
             return Response({"error": str(exc)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def post(self, request):
@@ -274,15 +264,15 @@ class QueryHistoryView(generics.GenericAPIView):
         if not user_id:
             return Response({"error": "Unauthorized"}, status=401)
         
+        from .models import QueryLog
+        from django.db.models import Q
         try:
-            from .utils import get_db
-            db = get_db()
-            history = list(db.query_history.find(
-                {"user_id": user_id},
-                {"_id": 0}
-            ).sort("timestamp", -1).limit(50))
-            
+            uid = int(user_id)
+            logs = QueryLog.objects.filter(Q(user_id=uid) | Q(user__isnull=True)).order_by("-created_at")[:50]
+            history = [l.to_dict() for l in logs]
             return Response({"history": history}, status=200)
+        except Exception:
+            return Response({"history": []}, status=200)
         except Exception as exc:
             return Response({"error": str(exc)}, status=500)
 

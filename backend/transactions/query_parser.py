@@ -20,12 +20,6 @@ from typing import Literal
 
 from pydantic import BaseModel
 
-try:
-    import dateparser
-    _DATEPARSER_AVAILABLE = True
-except ImportError:
-    _DATEPARSER_AVAILABLE = False
-
 from .merchant_normalizer import MERCHANT_MAP
 from .categorizer import CATEGORY_PATTERNS
 
@@ -146,14 +140,25 @@ def _extract_date_range(text: str) -> tuple[date | None, date | None]:
     year_match = re.search(r'\b(20\d{2})\b', text)
 
     m = _NAMED_MONTH_PATTERN.search(text)
+    month_num = None
     if m:
-        month_num = _MONTH_NAMES[m.group(1).lower()]
+        month_num = _MONTH_NAMES.get(m.group(1).lower())
+    else:
+        # Fuzzy match for typos in month names (e.g. "octber", "febrary", "novmber")
+        import difflib
+        words = re.findall(r"\b[a-zA-Z]{3,}\b", text.lower())
+        for word in words:
+            close_matches = difflib.get_close_matches(word, list(_MONTH_NAMES.keys()), n=1, cutoff=0.72)
+            if close_matches:
+                month_num = _MONTH_NAMES[close_matches[0]]
+                break
+
+    if month_num:
         if year_match:
             # Explicit year provided — use it directly
             year = int(year_match.group(1))
         else:
-            # No explicit year — find the most recent year that has data
-            # for this month by querying MongoDB
+            # Find the most recent year with data via Django ORM
             year = _find_year_with_data(month_num) or today.year
         return _month_range(year, month_num)
 
@@ -162,23 +167,14 @@ def _extract_date_range(text: str) -> tuple[date | None, date | None]:
 
 def _find_year_with_data(month_num: int) -> int | None:
     """
-    Query MongoDB to find the most recent year that has transactions
-    in the given month number. Falls back to None if DB is unreachable.
+    Query Django ORM to find the most recent year that has transactions
+    in the given month number. Falls back to None if DB is empty.
     """
     try:
-        from .utils import get_db
-        from django.conf import settings
-        db = get_db()
-        col = db[settings.MONGO_TRANSACTIONS_COLLECTION]
-        month_str = f"-{month_num:02d}-"
-        # Find the most recent document whose date contains this month
-        doc = col.find_one(
-            {"date": {"$regex": month_str}},
-            {"date": 1, "_id": 0},
-            sort=[("date", -1)],
-        )
-        if doc and doc.get("date"):
-            return int(doc["date"][:4])
+        from .models import Transaction
+        tx = Transaction.objects.filter(date__month=month_num).order_by("-date").first()
+        if tx:
+            return tx.date.year
     except Exception:
         pass
     return None

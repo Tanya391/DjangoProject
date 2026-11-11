@@ -119,3 +119,39 @@ class Transaction(models.Model):
             "balance": float(self.balance),
             "is_subscription": self.is_subscription,
         }
+
+
+class QueryLog(models.Model):
+    """
+    Logs financial natural language queries and AI synthesized answers.
+    Stored via Django ORM.
+    """
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="query_logs",
+        null=True,
+        blank=True
+    )
+    question = models.TextField()
+    route = models.CharField(max_length=50, default="rag")
+    answer = models.TextField(blank=True, default="")
+    source_count = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.created_at.strftime('%Y-%m-%d %H:%M')} | {self.question[:40]}"
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "question": self.question,
+            "route": self.route,
+            "answer": self.answer,
+            "source_count": self.source_count,
+            "timestamp": self.created_at.isoformat(),
+        }
+

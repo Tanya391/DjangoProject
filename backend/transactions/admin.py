@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.models import Group, User
-from .models import Category, Transaction
+from .models import Category, Transaction, QueryLog
 
 
 @admin.register(Category)
@@ -76,3 +76,12 @@ class TransactionAdmin(admin.ModelAdmin):
         prefix = "+" if obj.transaction_type == "credit" else "-"
         return f"{prefix}₹{obj.amount:.2f}"
     amount_display.short_description = "Amount"
+
+
+@admin.register(QueryLog)
+class QueryLogAdmin(admin.ModelAdmin):
+    list_display = ("id", "user", "question", "route", "source_count", "created_at")
+    list_filter = ("route", "created_at")
+    search_fields = ("question", "answer")
+    readonly_fields = ("created_at",)
+

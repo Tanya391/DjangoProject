@@ -1,5 +1,8 @@
 from django.conf import settings
-from pymongo import MongoClient
+try:
+    from pymongo import MongoClient
+except ImportError:
+    MongoClient = None
 
 
 _CLIENT = None
