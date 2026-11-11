@@ -1,30 +1,64 @@
-# FinAgent AI
+# FinAgent AI — Personal Financial Intelligence Platform
 
-FinAgent AI is an AI-powered personal finance analysis application built with a **Decoupled (Headless) Architecture**:
+FinAgent AI is a personal finance analysis platform built using an enterprise **Decoupled (Headless) Architecture**:
 - **Backend:** Django 5.x, Django ORM, and Django REST Framework (DRF)
 - **Frontend:** React, Vite, and TailwindCSS
-- **Database:** Relational SQLite database (`db.sqlite3`) with Django ORM
-- **AI Engine:** Google Gemini (`gemini-1.5-flash` via `google-genai` SDK)
+- **Database:** Relational SQLite database (`db.sqlite3`) managed through Django ORM
+- **AI Engine:** Google Gemini (`gemini-1.5-flash` via official `google-genai` SDK)
 
 ---
 
-## 🏗️ Architecture & Features
+## 🏗️ Architecture & Core Features
 
-1. **Django ORM Data Layer:**
-   - Relational models: `Transaction` and `Category` with Foreign Keys linked to Django's built-in `User` model.
-   - Comprehensive Django migrations (`0001_initial.py`).
-   - High-performance deterministic analytics engine using Django ORM aggregations (`Sum`, `Count`, `TruncMonth`).
+### 1. Django ORM Data Layer & Migrations
+- **Relational Models:**
+  - `Category`: Categorization model supporting Foreign Key relationships.
+  - `Transaction`: Core financial record with `ForeignKey(User)` and `ForeignKey(Category)`, merchant auto-normalization, and dual-indexing (`db_index=True`).
+  - `QueryLog`: Audit log tracking natural language questions, routing intents, source counts, and AI-synthesized responses.
+- **Migrations:** Managed version control of database schemas (`0001_initial.py`, `0002_querylog.py`).
+- **Deterministic Analytics Engine:** Math and summaries are executed via Django ORM aggregations (`Sum`, `Count`, `TruncMonth`), guaranteeing 0% AI hallucination for financial calculations.
 
-2. **Django Admin Interface:**
-   - Fully customized admin dashboard for data auditing, list filters by category/type/date, full-text search, and role-based access control (RBAC).
+### 2. Django Admin Interface (`/admin/`)
+- Fully customized back-office admin dashboard:
+  - List displays, color-coded transaction amounts (`+₹` for credits, `-₹` for debits).
+  - Multi-parameter filtering (by transaction type, category, subscription status, and date hierarchies).
+  - Search fields across merchant names, descriptions, and transaction IDs.
+  - User and Group Role-Based Access Control (RBAC).
 
-3. **RESTful API & Authentication:**
-   - Stateless authentication powered by `djangorestframework-simplejwt` (Access & Refresh tokens).
-   - DRF Serializers handling JSON schema validation and error reporting.
+### 3. Structured Database RAG Pipeline
+- **Dual-Routing System:**
+  - *Mathematical Queries* (e.g., *"What did I spend on dining?"*): Executed deterministically by Django ORM.
+  - *Analytical Queries* (e.g., *"Analyze my spending patterns"*): Routed to Google Gemini with retrieved Django ORM records injected as grounding context.
+- **In-Memory Caching:** MD5-hashed query cache in `llm_service.py` prevents duplicate API calls and eliminates latency for repeated queries.
+- **Fuzzy Token Matching:** `difflib`-powered date parser resolves misspelled month names (e.g. `"octber"`, `"febrary"`) to correct date boundaries.
 
-4. **Hybrid AI & Deterministic Retrieval:**
-   - Exact mathematical calculations and monthly summaries are executed via Django ORM.
-   - Natural language queries, financial insights, and spending explanations are processed via Google Gemini.
+### 4. Live Frontend Data Seeding & Management
+- Interactive **Data Management** panel (`/data`):
+  - **Load Sample Transactions:** Seeds 6 months of realistic categorized transactions directly from the browser UI (`POST /api/v1/seed/`).
+  - **Clear Data:** Wipes transaction records on demand (`DELETE /api/v1/seed/`) to demonstrate live empty-to-seeded transitions to evaluators.
+  - **CSV Statement Upload:** Ingests and validates bank CSV statement files (`POST /api/v1/upload/`).
+
+---
+
+## 🔌 API Endpoints Reference
+
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `POST` | `/api/v1/auth/register/` | Register a new user |
+| `POST` | `/api/v1/auth/login/` | Obtain JWT access and refresh token pair |
+| `POST` | `/api/v1/auth/refresh/` | Refresh expired JWT access token |
+| `GET` | `/api/v1/status/` | Service health check |
+| `GET` | `/api/v1/transactions/` | Paginated list of transactions with search & category filters |
+| `POST` | `/api/v1/ask/` | Ask financial questions to the AI Assistant (RAG Pipeline) |
+| `GET` | `/api/v1/history/` | Audit history of past financial queries |
+| `GET` | `/api/v1/monthly-summary/` | Aggregated monthly income, expenses, and net cash flow |
+| `GET` | `/api/v1/spending-by-category/` | Spending totals grouped by category |
+| `GET` | `/api/v1/top-merchants/` | Top 10 merchants ranked by total expenditure |
+| `GET` | `/api/v1/cashflow/` | Total credits vs. debits breakdown |
+| `GET` | `/api/v1/subscriptions/` | Recurring subscription detection |
+| `POST` | `/api/v1/seed/` | Generate 6 months of realistic synthetic transactions |
+| `DELETE` | `/api/v1/seed/` | Clear user transactions (for live demo resetting) |
+| `POST` | `/api/v1/upload/` | Ingest CSV statement file |
 
 ---
 
@@ -32,67 +66,79 @@ FinAgent AI is an AI-powered personal finance analysis application built with a 
 
 ### 1. Backend Setup (Django)
 
-1. Navigate to the backend directory:
-   ```bash
+1. Open a terminal and navigate to `backend/`:
+   ```powershell
    cd backend
    ```
 
-2. Install dependencies:
-   ```bash
+2. (Recommended) Create and activate a virtual environment:
+   ```powershell
+   python -m venv venv
+   .\venv\Scripts\Activate.ps1
+   ```
+
+3. Install dependencies:
+   ```powershell
    pip install -r requirements.txt
    ```
 
-3. Configure environment variables (optional for local dev):
+4. Configure environment variables:
    Copy `.env.example` to `.env`:
-   ```bash
+   ```powershell
    copy .env.example .env
    ```
+   *Add your `GEMINI_API_KEY` (get a free key at [Google AI Studio](https://aistudio.google.com/app/apikey)).*
 
-4. Apply migrations (pre-configured SQLite database included):
-   ```bash
+5. Apply database migrations:
+   ```powershell
    python manage.py migrate
    ```
 
-5. (Optional) Seed realistic demo transactions:
-   ```bash
-   python manage.py seed_transactions --months 6
-   ```
-
-6. Start the Django development server:
-   ```bash
+6. Start the Django server:
+   ```powershell
    python manage.py runserver
    ```
    - **Backend API:** `http://127.0.0.1:8000/api/v1/status/`
    - **Django Admin Panel:** `http://127.0.0.1:8000/admin/`
-     - **Admin User:** `admin`
-     - **Admin Password:** `admin123`
 
 ---
 
 ### 2. Frontend Setup (React + Vite)
 
-1. In a new terminal, navigate to the frontend directory:
-   ```bash
+1. Open a **second terminal** and navigate to `frontend/`:
+   ```powershell
    cd frontend
    ```
 
 2. Install dependencies:
-   ```bash
+   ```powershell
    npm install
    ```
 
 3. Start the Vite development server:
-   ```bash
+   ```powershell
    npm run dev
    ```
-   - Open your browser at: `http://localhost:5173`
+   - **Web Application:** `http://localhost:5173`
+
+---
+
+### 🔑 Demo Credentials
+
+* **Django Admin Panel (`/admin/`):**
+  * **Username:** `admin`
+  * **Password:** `admin123`
+* **Default App User:**
+  * **Username:** `demouser`
+  * **Password:** `Password@123`
+  *(You can also register any new account directly through the frontend).*
 
 ---
 
 ## 🧪 Automated Testing
 
-Run the Django unit test suite:
-```bash
+Run the Django test suite:
+```powershell
 python manage.py test
 ```
-All tests verify ORM model creation, foreign key relationships, merchant auto-normalization, and API endpoints.
+**Verification:** Runs 7 automated unit tests covering ORM models, foreign key lookups, merchant auto-normalization, and API endpoints (`OK`).
