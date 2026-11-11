@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Upload, Database, CheckCircle2, AlertCircle, FileText, Sparkles, RefreshCw } from 'lucide-react';
+import { Upload, Database, CheckCircle2, AlertCircle, FileText, Sparkles, RefreshCw, Trash2 } from 'lucide-react';
 import { api } from '../services/api';
 import { useQueryClient } from '@tanstack/react-query';
 
@@ -10,6 +10,7 @@ export function DataManagementPage() {
   const [uploadError, setUploadError] = useState(null);
 
   const [seeding, setSeeding] = useState(false);
+  const [clearing, setClearing] = useState(false);
   const [seedSuccess, setSeedSuccess] = useState(null);
   const [seedError, setSeedError] = useState(null);
 
@@ -68,6 +69,23 @@ export function DataManagementPage() {
       setSeedError(err.message || 'Failed to generate demo data.');
     } finally {
       setSeeding(false);
+    }
+  };
+
+  const handleClear = async () => {
+    if (!window.confirm("Are you sure you want to clear transactions to demonstrate fresh seeding?")) return;
+    setClearing(true);
+    setSeedSuccess(null);
+    setSeedError(null);
+
+    try {
+      const res = await api.resetDemoData();
+      setSeedSuccess(res.message || 'Transactions cleared successfully!');
+      queryClient.invalidateQueries();
+    } catch (err) {
+      setSeedError(err.message || 'Failed to clear transactions.');
+    } finally {
+      setClearing(false);
     }
   };
 
@@ -170,20 +188,32 @@ export function DataManagementPage() {
             )}
           </div>
 
-          <button
-            onClick={handleSeed}
-            disabled={seeding}
-            className="w-full py-2.5 bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 disabled:opacity-50 text-white font-semibold text-xs rounded-xl shadow-lg transition flex items-center justify-center gap-2"
-          >
-            {seeding ? (
-              'Seeding Demo Transactions...'
-            ) : (
-              <>
-                <Sparkles className="w-4 h-4 text-cyan-200" />
-                Load Sample Transactions
-              </>
-            )}
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={handleSeed}
+              disabled={seeding || clearing}
+              className="flex-1 py-2.5 bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 disabled:opacity-50 text-white font-semibold text-xs rounded-xl shadow-lg transition flex items-center justify-center gap-2"
+            >
+              {seeding ? (
+                'Seeding Demo Transactions...'
+              ) : (
+                <>
+                  <Sparkles className="w-4 h-4 text-cyan-200" />
+                  Load Sample Transactions
+                </>
+              )}
+            </button>
+            <button
+              type="button"
+              onClick={handleClear}
+              disabled={seeding || clearing}
+              className="px-3.5 py-2.5 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-900/40 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-900/50 font-semibold text-xs rounded-xl transition flex items-center justify-center gap-1.5"
+              title="Clear all transactions to show an empty state before seeding"
+            >
+              <Trash2 className="w-4 h-4" />
+              {clearing ? 'Clearing...' : 'Clear'}
+            </button>
+          </div>
         </div>
       </div>
     </div>

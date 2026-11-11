@@ -357,6 +357,9 @@ class SeedDemoDataView(generics.GenericAPIView):
     """
     POST /api/v1/seed/
     Generates 6 months of realistic dummy transaction data for the logged-in user.
+
+    DELETE /api/v1/seed/
+    Clears transactions so the user can demonstrate live seeding from an empty state.
     """
     permission_classes = [IsAuthenticated]
 
@@ -366,13 +369,29 @@ class SeedDemoDataView(generics.GenericAPIView):
             return Response({"error": "User ID required"}, status=status.HTTP_401_UNAUTHORIZED)
         
         try:
-            # We can optionally read 'months' from request data if we want to allow flexibility
             months = int(request.data.get("months", 6))
             count = generate_demo_data(str(user_id), months=months)
             return Response({
-                "message": f"Successfully generated {count} transactions.",
+                "message": f"Successfully seeded {count} demo transactions into SQLite.",
                 "count": count
             }, status=status.HTTP_201_CREATED)
+        except Exception as exc:
+            return Response({"error": str(exc)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def delete(self, request):
+        user_id = _get_user_id(request)
+        if not user_id:
+            return Response({"error": "User ID required"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        try:
+            from .models import Transaction
+            from django.db.models import Q
+            uid = int(user_id)
+            count, _ = Transaction.objects.filter(Q(user_id=uid) | Q(user__isnull=True)).delete()
+            return Response({
+                "message": f"Successfully cleared {count} transactions. Ready for demo seeding!",
+                "count": count
+            }, status=status.HTTP_200_OK)
         except Exception as exc:
             return Response({"error": str(exc)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 

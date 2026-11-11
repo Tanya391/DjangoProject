@@ -75,4 +75,5 @@ export const api = {
   // Data Management
   uploadCSV: (formData) => request('/upload/', { method: 'POST', body: formData }),
   seedDemoData: () => request('/seed/', { method: 'POST' }),
+  resetDemoData: () => request('/seed/', { method: 'DELETE' }),
 };
